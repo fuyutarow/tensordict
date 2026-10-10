@@ -85,6 +85,16 @@ if TYPE_CHECKING:
 else:
     Self = Any
 
+if TYPE_CHECKING:
+    class _TensorclassInjected:
+        batch_size: torch.Size
+        device: torch.device | None
+        names: Sequence[str] | None
+        def clone(self, recurse: bool = True) -> Self: ...
+        def to(self, device: torch.device) -> Self: ...
+        def cpu(self) -> Self: ...
+        def cuda(self, device: int | None = None) -> Self: ...
+
 class TensorClass:
     _autocast: bool = False
     _nocast: bool = False
@@ -1449,7 +1459,7 @@ class TensorClass:
     @overload
     def to(
         self,
-        device: int | torch.device | None = ...,
+        device: int | torch.device | str | None = ...,
         dtype: torch.dtype | None = ...,
         non_blocking: bool = ...,
         inplace: bool = False,
@@ -1510,7 +1520,7 @@ def tensorclass(
     nocast: bool = False,
     shadow: bool = False,
     tensor_only: bool = False,
-) -> T: ...
+) -> T | _TensorclassInjected: ...
 def is_non_tensor(obj) -> bool: ...
 def from_dataclass(
     obj: Any,
